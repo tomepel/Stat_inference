@@ -14,7 +14,7 @@ will try to test the normality of the resulting distribution.
 # I) Sample Mean
 
 We start by generating our 10000 samples of averages of 40 simulations
-of the expponential distribution with a parameter $\lambda=0.2$. The seed is set
+of the exponential distribution with a parameter $\lambda=0.2$. The seed is set
 in order being able to reproduce the result.
 
 ```{r}
@@ -52,7 +52,7 @@ of 40 simulations, we expect $1/(\lambda\,\sqrt{40})$. This is equal to
 ```{r}
 1/(lambda*sqrt(40))
 ```
-This is again pretty close to what we found. More in this in the next part
+This is again pretty close to what we found. More in this in the next part.
 
 # Normality of the resulting distribution
 
