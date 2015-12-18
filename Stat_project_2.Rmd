@@ -66,7 +66,7 @@ sdOJ<-sd(ToothGrowth$len[ToothGrowth$supp=="OJ"])
 sdVC<-sd(ToothGrowth$len[ToothGrowth$supp=="VC"])
 ```
 
-We will assume equal variance. Our hypothesis $H_0$ is : the teeth length is the
+ Our hypothesis $H_0$ is : the teeth length is the
 same whatever the delivery method, while our $H_a$ hypothesis is that
 the OJ delivery method gives different teeth length than the VC one. Given the small size 
 of our sample, we will do a confidence interval analysis with the quantile of the
@@ -76,7 +76,7 @@ student-t distribution. We will assume equal variance. The relevant formulas are
 qt(0.975,N_{_{\rm OJ}}+N_{_{\rm VC}}-2)\times \Sigma\times
 \sqrt{\frac{1}{N_{_{\rm OJ}}}+\frac{1}{N_{_{\rm VC}} }}
 \end{align}
-where the pooled variance is
+where the pooled standard error being
 \begin{align}
 \Sigma=\sqrt{\frac{(N_{_{\rm OJ}}-1)\sigma^2_{_{\rm OJ}}
 +(N_{_{\rm VC}}-1)\sigma^2_{VC}}{N_{_{\rm OJ}}+N_{_{\rm VC}}-2}}
