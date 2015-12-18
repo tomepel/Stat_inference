@@ -1,0 +1,132 @@
+---
+title: "Project 2: a study on the ToothGrowth database"
+output: pdf_document
+---
+
+# 0) Introduction
+
+In this short note, we will do a simple statistical analysis of the ToothGrowth
+database contained in the datasets library. Note for the reviewers: since it
+is quite useless to go back and forth between the code put in appendix and 
+the core of the project, I merged the two.
+
+# I) Exploratory analysis
+
+We start by loading the datasets library
+
+```{r,results="hide"}
+library(datasets)
+ dim(ToothGrowth)
+```
+
+we see that ToothGrowth is a $60\times 3$ dataframe. The first column
+(using `?ToothGrowth`)
+corresponds to the length of teeth in each of 10 guinea pigs, the second column
+to two different delivery methods (orange juice or ascorbic acid). The thirs
+column corresponds to three different dose levels of Vitamin 
+C (0.5, 1, and 2 mg). Since the Vitamine dose and the delivery method are qualitative variables, we 
+will convert them into factors
+
+```{r}
+ToothGrowth$supp<-as.factor(ToothGrowth$supp)
+ ToothGrowth$dose<-as.factor(ToothGrowth$dose)
+```
+
+Let us consider following the exploratory graph
+
+
+```{r,fig.height=3.7,fig.width=6}
+ library(lattice)
+histogram(~len|dose*supp,data=ToothGrowth, xlab="teeth length",
+    main=list(label="teeth length as a function of Vitamine dose and delivery method"
+              ,cex=0.7),col="cornflowerblue")
+```
+
+and  a summary of the data frame gives
+
+```{r}
+summary(ToothGrowth)
+```
+
+The histograms represent the length of the teeth as a function of both the
+delivery method and the vitamine dose. As one can see, as the Vitamine dose 
+increases, the teeth length seems to increas as well. It also seems that the 
+Orange Juice delivery method leads to slightly longer teeth than with 
+ascorbic acid. This will be our working hypotheses for the next section.
+
+# I) Does the teeth length depends on the delivery method?
+
+
+Firstly, does the teeth length depends on the delivery method? We can compute 
+the mean and the standard deviation of both classes with
+```{r}
+meanOJ<-mean(ToothGrowth$len[ToothGrowth$supp=="OJ"])
+meanVC<-mean(ToothGrowth$len[ToothGrowth$supp=="VC"])
+sdOJ<-sd(ToothGrowth$len[ToothGrowth$supp=="OJ"])
+sdVC<-sd(ToothGrowth$len[ToothGrowth$supp=="VC"])
+```
+
+We will assume equal variance. Our hypothesis $H_0$ is : the teeth length is the
+same whatever the delivery method, while our $H_a$ hypothesis is that
+the OJ delivery method gives different teeth length than the VC one. Given the small size 
+of our sample, we will do a confidence interval analysis with the quantile of the
+student-t distribution. We will assume equal variance. The relevant formulas are
+\begin{align}
+[\text{conf int}]=\null& \mu_{_{\rm OJ}}-\mu_{_{\rm VC}}\pm
+qt(0.975,N_{_{\rm OJ}}+N_{_{\rm VC}}-2)\times \Sigma\times
+\sqrt{\frac{1}{N_{_{\rm OJ}}}+\frac{1}{N_{_{\rm VC}} }}
+\end{align}
+where the pooled variance is
+\begin{align}
+\Sigma=\sqrt{\frac{(N_{_{\rm OJ}}-1)\sigma^2_{_{\rm OJ}}
++(N_{_{\rm VC}}-1)\sigma^2_{VC}}{N_{_{\rm OJ}}+N_{_{\rm VC}}-2}}
+\end{align}
+
+the R calculation gives 
+```{r}
+NOJ<-sum(ToothGrowth$supp=="OJ")
+NVC<-sum(ToothGrowth$supp=="VC")
+Sigma<-sqrt(((NOJ-1)*sdOJ^2+(NVC-1)*sdVC^2)/(NOJ+NVC-2))
+meanOJ-meanVC+c(-1,1)*qt(0.975,NOJ+NVC-2)*Sigma*sqrt(1/NOJ+1/NVC)
+```
+
+the same result can be obtained with
+```{r}
+t.test(ToothGrowth$len[ToothGrowth$supp=="OJ"],
+       ToothGrowth$len[ToothGrowth$supp=="VC"],paired=FALSE,var.equal=TRUE)$conf
+```
+
+Since $0$ is in the $95\%$ confidence interval, we \textbf{fail to reject the 
+null Hypothesis $H_0$}. 
+
+# I) Does the teeth length depends on the vitamine dose ?
+
+
+Secondly, does the teeth length depends on the vitamine dose? This time we will
+just use the built-in R function. We will assume equal variance. 
+Our hypothesis $H_0$ is : the mean of the length
+teeth does not depend on the vitamine dose, while our $H_a$ hypothesis is that
+the vitamine dose affects the teeth length. Since the t-test is 
+designed to compare between two groups, we will do three t-test: between the 
+$0.5$ and the $1$mg doses, the $0.5$ and the $2$mg doses and finally between the
+$1$ and the $2$mg doses.
+
+1. $0.5$ vs $1$mg dose:
+```{r}
+t.test(ToothGrowth$len[ToothGrowth$dose=="1"],
+       ToothGrowth$len[ToothGrowth$dose=="0.5"],paired=FALSE,var.equal=TRUE)$conf
+```
+
+2. $0.5$ vs $2$mg dose:
+```{r}
+t.test(ToothGrowth$len[ToothGrowth$dose=="2"],
+       ToothGrowth$len[ToothGrowth$dose=="0.5"],paired=FALSE,var.equal=TRUE)$conf
+```
+
+3. $1$ vs $2$mg dose:
+```{r}
+t.test(ToothGrowth$len[ToothGrowth$dose=="2"],
+       ToothGrowth$len[ToothGrowth$dose=="1"],paired=FALSE,var.equal=TRUE)$conf
+```
+In all cases, $0$ is in not in the $95\%$ confidence interval and we \textbf{reject the 
+null Hypotheses $H_0$}. 
